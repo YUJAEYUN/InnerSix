@@ -3,6 +3,11 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
 
+// 행성이 분포한 방위각 범위 (약간 여유 추가)
+const AZ_MIN = -72;   // 수성 왼쪽 여백
+const AZ_MAX = 65;    // 해왕성 오른쪽 여백
+const AUTO_SPEED = 0.018; // 자동 이동 속도 (도/프레임)
+
 export default function SkyCamera() {
   const { camera, gl } = useThree();
 
@@ -10,8 +15,9 @@ export default function SkyCamera() {
     isDragging: false,
     lastX: 0,
     lastY: 0,
-    azimuth: -5,
+    azimuth: -5,    // 시작: 행성들 중앙 부근
     elevation: 22,
+    autoDir: -1 as 1 | -1,  // -1: 왼쪽(수성 방향), 1: 오른쪽(해왕성 방향)
   });
 
   const updateCamera = useCallback(() => {
@@ -31,7 +37,6 @@ export default function SkyCamera() {
     const canvas = gl.domElement;
 
     const onDown = (e: PointerEvent) => {
-      // 브라우저 기본 터치 동작(스크롤, 핀치줌) 차단 — 핵심 수정
       e.preventDefault();
       state.current.isDragging = true;
       state.current.lastX = e.clientX;
@@ -43,24 +48,31 @@ export default function SkyCamera() {
       e.preventDefault();
       const dx = e.clientX - state.current.lastX;
       const dy = e.clientY - state.current.lastY;
-      // 모바일은 민감도 낮춰서 부드럽게
       const sensitivity = e.pointerType === "touch" ? 0.18 : 0.25;
       state.current.azimuth -= dx * sensitivity;
       state.current.elevation = Math.max(5, Math.min(70, state.current.elevation + dy * 0.12));
       state.current.lastX = e.clientX;
       state.current.lastY = e.clientY;
+      updateCamera();
     };
 
-    const onUp = () => { state.current.isDragging = false; };
+    const onUp = () => {
+      state.current.isDragging = false;
+      // 드래그 후 범위 밖이면 클램프 + 방향 전환
+      if (state.current.azimuth < AZ_MIN) {
+        state.current.azimuth = AZ_MIN;
+        state.current.autoDir = 1;
+      } else if (state.current.azimuth > AZ_MAX) {
+        state.current.azimuth = AZ_MAX;
+        state.current.autoDir = -1;
+      }
+    };
 
-    // passive: false → preventDefault() 허용
     canvas.addEventListener("pointerdown", onDown, { passive: false });
     canvas.addEventListener("pointermove", onMove, { passive: false });
     canvas.addEventListener("pointerup", onUp);
     canvas.addEventListener("pointercancel", onUp);
     canvas.addEventListener("pointerleave", onUp);
-
-    // 캔버스 자체의 터치 액션 CSS 비활성화
     canvas.style.touchAction = "none";
 
     return () => {
@@ -73,10 +85,20 @@ export default function SkyCamera() {
   }, [camera, gl, updateCamera]);
 
   useFrame(() => {
-    if (!state.current.isDragging) {
-      state.current.azimuth -= 0.025;
-      updateCamera();
+    if (state.current.isDragging) return;
+
+    state.current.azimuth += AUTO_SPEED * state.current.autoDir;
+
+    // 경계에서 방향 반전
+    if (state.current.azimuth <= AZ_MIN) {
+      state.current.azimuth = AZ_MIN;
+      state.current.autoDir = 1;
+    } else if (state.current.azimuth >= AZ_MAX) {
+      state.current.azimuth = AZ_MAX;
+      state.current.autoDir = -1;
     }
+
+    updateCamera();
   });
 
   return null;
