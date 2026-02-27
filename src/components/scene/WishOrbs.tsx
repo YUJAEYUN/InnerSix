@@ -37,13 +37,13 @@ function WishOrb({ wish, position }: OrbProps) {
         onPointerOut={() => setHovered(false)}
         onClick={() => setShowCard((v) => !v)}
       >
-        <sphereGeometry args={[0.12, 16, 16]} />
+        <sphereGeometry args={[0.35, 16, 16]} />
         <meshBasicMaterial color={hovered ? "#ffffff" : "#a0b8ff"} />
       </mesh>
 
       {/* 글로우 */}
-      <mesh position={position} scale={1.6}>
-        <sphereGeometry args={[0.12, 8, 8]} />
+      <mesh position={position} scale={1.8}>
+        <sphereGeometry args={[0.35, 8, 8]} />
         <meshBasicMaterial
           color="#6c9fff"
           transparent
@@ -70,12 +70,18 @@ function WishOrb({ wish, position }: OrbProps) {
 }
 
 export default function WishOrbs({ wishes }: Props) {
+  // 소원 구체를 하늘 곳곳에 배치 (카메라 [0,1.6,0] 기준, r=30~55)
   const positions = useMemo<[number, number, number][]>(() => {
-    return wishes.map(() => [
-      (Math.random() - 0.5) * 28,
-      (Math.random() - 0.5) * 6,
-      (Math.random() - 0.5) * 8,
-    ]);
+    return wishes.map(() => {
+      const az = ((Math.random() - 0.5) * 130 * Math.PI) / 180;
+      const el = ((10 + Math.random() * 45) * Math.PI) / 180;
+      const r = 30 + Math.random() * 25;
+      return [
+        r * Math.cos(el) * Math.sin(az),
+        r * Math.sin(el) + 1.6,
+        -r * Math.cos(el) * Math.cos(az),
+      ];
+    });
   }, [wishes]);
 
   return (

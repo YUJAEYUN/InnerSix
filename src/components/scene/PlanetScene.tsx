@@ -1,10 +1,10 @@
 "use client";
 
-import { Suspense, useRef } from "react";
+import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import StarField from "./StarField";
+import SkyCamera from "./SkyCamera";
 import Planet from "./Planet";
 import WishOrbs from "./WishOrbs";
 import { PLANETS } from "@/lib/planets";
@@ -17,32 +17,32 @@ type Props = {
 };
 
 export default function PlanetScene({ wishes, showOrbs }: Props) {
-  const controlsRef = useRef(null);
-
   return (
     <Canvas
-      camera={{ position: [3, 2, 14], fov: 60 }}
+      camera={{ position: [0, 1.6, 0], fov: 75 }}
       gl={{
         antialias: true,
         toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 0.9,
+        toneMappingExposure: 0.85,
       }}
       dpr={[1, 1.5]}
       style={{ background: "#050510" }}
     >
-      {/* 조명 */}
-      <ambientLight intensity={0.08} color="#1a1a3a" />
+      {/* 지구에서 올려다보는 1인칭 카메라 */}
+      <SkyCamera />
+
+      {/* 조명 — 낮은 고도에서 비추는 달빛/새벽 느낌 */}
+      <ambientLight intensity={0.06} color="#10103a" />
       <directionalLight
-        position={[-30, 10, 10]}
-        intensity={1.8}
-        color="#fff5e0"
+        position={[-80, 20, -40]}
+        intensity={1.6}
+        color="#ffe8c0"
       />
-      <pointLight position={[0, 0, 0]} intensity={0.4} color="#4060ff" distance={40} />
 
       <Suspense fallback={null}>
         <StarField />
 
-        {/* 6개 행성 */}
+        {/* 6개 행성 — 하늘에 배치 */}
         {PLANETS.map((planet) => (
           <Planet key={planet.id} planet={planet} />
         ))}
@@ -51,27 +51,14 @@ export default function PlanetScene({ wishes, showOrbs }: Props) {
         {showOrbs && wishes.length > 0 && <WishOrbs wishes={wishes} />}
       </Suspense>
 
-      {/* 카메라 컨트롤 */}
-      <OrbitControls
-        ref={controlsRef}
-        autoRotate
-        autoRotateSpeed={0.3}
-        enableZoom
-        enablePan={false}
-        minDistance={6}
-        maxDistance={30}
-        maxPolarAngle={Math.PI * 0.75}
-        minPolarAngle={Math.PI * 0.25}
-      />
-
       {/* 포스트 프로세싱 */}
       <EffectComposer>
         <Bloom
-          luminanceThreshold={0.2}
-          luminanceSmoothing={0.9}
-          intensity={1.4}
+          luminanceThreshold={0.15}
+          luminanceSmoothing={0.85}
+          intensity={1.8}
         />
-        <Vignette eskil={false} offset={0.3} darkness={0.8} />
+        <Vignette eskil={false} offset={0.25} darkness={0.9} />
       </EffectComposer>
     </Canvas>
   );

@@ -116,6 +116,15 @@ export default function Home() {
         )}
       </AnimatePresence>
 
+      {/* 지평선 그라디언트 — 땅 위에 서 있는 느낌 */}
+      <div
+        className="absolute bottom-0 left-0 right-0 z-[5] pointer-events-none"
+        style={{
+          height: "28%",
+          background: "linear-gradient(to top, #020308 0%, #050510aa 40%, transparent 100%)",
+        }}
+      />
+
       {/* 하단 버튼 */}
       <div className="absolute bottom-0 left-0 right-0 z-10 pb-8 sm:pb-10">
         <p className="text-white/20 text-xs text-center mb-4 sm:hidden">
