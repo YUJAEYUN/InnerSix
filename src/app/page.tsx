@@ -72,9 +72,24 @@ export default function Home() {
           <h1 className="text-white font-semibold tracking-wider text-sm sm:text-base">
             INNER<span className="text-purple-400">SIX</span>
           </h1>
-          <p className="text-white/30 text-xs hidden sm:block">
-            2026.02.28 행성 퍼레이드
-          </p>
+          <a
+            href="https://www.instagram.com/po_dev_to/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-white/40 hover:text-white/80 transition-colors group"
+          >
+            {/* Instagram 아이콘 */}
+            <svg
+              width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+              className="group-hover:stroke-purple-400 transition-colors"
+            >
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <circle cx="12" cy="12" r="4"/>
+              <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/>
+            </svg>
+            <span className="text-xs tracking-wide">@po_dev_to</span>
+          </a>
         </div>
       </header>
 
